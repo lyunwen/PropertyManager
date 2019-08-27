@@ -34,16 +34,16 @@ class AuthManager extends React.Component {
   }
 
   propertyNameAdd = (name, regex) => {
-    let thisPros = this.state.propertyList.filter(x => x.name == name && x.regex == regex)
+    let thisPros = this.state.propertyNameList.filter(x => x.name == name && x.regex == regex)
     if (thisPros.length == 0) {
-      this.state.propertyList.push({ name: name, regex: regex })
+      this.state.propertyNameList.push({ name: name, regex: regex })
       this.setState({})
     }
   }
   propertyNameDel = (name, regex) => {
-    let thisPros = this.state.propertyList.filter(x => x.name == name && x.regex == regex)
+    let thisPros = this.state.propertyNameList.filter(x => x.name == name && x.regex == regex)
     if (thisPros.length > 0) {
-      this.state.propertyList.splice(this.state.propertyList.indexOf(thisPros[0]), 1)
+      this.state.propertyNameList.splice(this.state.propertyNameList.indexOf(thisPros[0]), 1)
     }
     this.setState({})
   }
@@ -205,7 +205,7 @@ class AuthManager extends React.Component {
         <div style={{ background: '#ECECEC', padding: '30px' }}>
           <Row gutter={16}>
             <Col span={12}>
-              <AuthMappingGroup
+              {/* <AuthMappingGroup
                 authList={this.state.authList}
                 groupList={this.state.groupList}
 
@@ -217,7 +217,7 @@ class AuthManager extends React.Component {
                 updateAuthMappingGroupSelectedItems={this.updateAuthMappingGroupSelectedItems}
 
                 mappingAuth={this.mappingAuth}
-              />
+              /> */}
             </Col>
           </Row>
         </div>
@@ -225,7 +225,7 @@ class AuthManager extends React.Component {
 
           <Row gutter={16}>
             <Col span={24}>
-              <Mapping
+              {/* <Mapping
                 authList={this.state.authList}
                 userList={this.state.userList}
                 groupList={this.state.groupList}
@@ -242,7 +242,7 @@ class AuthManager extends React.Component {
 
                 mappingAuthD={this.mappingAuthD}
                 mappingUserD={this.mappingUserD}
-              />
+              /> */}
             </Col>
           </Row>
         </div>

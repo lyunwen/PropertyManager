@@ -5,14 +5,15 @@ import { Card, Tag, Input, Tooltip, Icon } from "antd";
 class PropertyName extends React.Component {
   state = {
     inputVisible: false,
-    inputValue: '',
+    inputNameValue: '',
+    inputRegexValue: '',
   };
-  thisInput = null;
+  thisNameInput = null;
+  thisRegexInput = null;
   inputShow = () => {
-    this.setState({ inputVisible: true }, () => this.thisInput.focus());
+    this.setState({ inputVisible: true }, () => { this.thisNameInput.focus() });
   };
   render() {
-    const { inputVisible, inputValue } = this.state
     const {
       propertyNameAdd,
       propertyNameDel,
@@ -20,25 +21,37 @@ class PropertyName extends React.Component {
     } = this.props
     return (<Card title={<span>PropertyName Pool</span>} bordered={false} >
       {propertyNameList.map((propertyName) => {
-        return <Tag closable={true} visible={true} onClose={() => propertyNameAdd(auth)} style={{ padding: '5px', margin: '5px' }}>
-          {propertyName.name+"-"+propertyName.regex}
+        return <Tag closable={true} visible={true} onClose={() => propertyNameDel(propertyName.name, propertyName.regex)} style={{ padding: '5px', margin: '5px' }}>
+          {propertyName.name + "-" + propertyName.regex}
         </Tag>;
       })}
-      {inputVisible && (
-        <Input
-          ref={(e) => this.thisInput = e}
-          type="text"
-          size="small"
-          style={{ width: 78 }}
-          value={inputValue}
-          onChange={(e) => { this.setState({ inputValue: e.target.value }) }}
-          onBlur={() => { authAdd(inputValue); this.setState({ inputValue: '', inputVisible: false }) }}
-          onPressEnter={() => { authAdd(inputValue); this.setState({ inputValue: '', inputVisible: false }) }}
-        />
+      {this.state.inputVisible && (
+        <div>
+          <Input
+            ref={(e) => this.thisNameInput = e}
+            placeholder="name"
+            type="text"
+            size="small"
+            style={{ width: 78 }}
+            value={this.state.inputNameValue}
+            onChange={(e) => { this.setState({ inputNameValue: e.target.value }) }}
+            onPressEnter={() => { propertyNameAdd(this.state.inputNameValue, this.state.inputRegexValue); this.setState({ inputVisible: false, inputNameValue: '', inputRegexValue: '' }) }}
+          />
+          <Input
+            ref={(e) => this.thisRegexInput = e}
+            placeholder="regex"
+            type="text"
+            size="small"
+            style={{ width: 78 }}
+            value={this.state.inputRegexValue}
+            onChange={(e) => { this.setState({ inputRegexValue: e.target.value }) }}
+            onPressEnter={() => { propertyNameAdd(this.state.inputNameValue, this.state.inputRegexValue); this.setState({ inputVisible: false, inputNameValue: '', inputRegexValue: '' }) }}
+          />
+        </div>
       )}
-      {!inputVisible && (
+      {!this.state.inputVisible && (
         <Tag onClick={this.inputShow} style={{ background: '#fff', borderStyle: 'dashed' }}>
-          <Icon type="plus" /> Add Auth
+          <Icon type="plus" /> add property name
           </Tag>
       )}
     </Card>)
