@@ -1,0 +1,24 @@
+{
+  "dependencies": {
+    "antd": "latest",
+    "dragm": "0.0.5",
+    "moment": "2",
+    "peer": "^0.2.10",
+    "rc-tween-one": "^2.6.0",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "keywords": [],
+  "name": "antd-reproduction-template",
+  "description": null,
+  "version": "0.0.33",
+  "devDependencies": {
+    "react-scripts": "1.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
