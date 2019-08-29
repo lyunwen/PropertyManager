@@ -18,7 +18,7 @@ class PropertyName extends React.Component {
       propertyNameAdd,
       propertyNameList,
     } = this.props
-    return (<Card title={<span>PropertyName Pool</span>} bordered={false} >
+    return (<Card title={<span>属性名称 Pool</span>} bordered={false} >
       {propertyNameList.map((propertyName) => {
         return <Tag closable={false} visible={true} style={{ padding: '5px', margin: '5px' }}>
           {propertyName.name + "-" + propertyName.regex}

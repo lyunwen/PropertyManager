@@ -5,7 +5,7 @@ import "antd/dist/antd.css";
 import PropertyName from "./property/PropertyName";
 import PropertyNameGroup from "./property/PropertyNameGroup";
 import PropertyNameGroupMapping from "./property/PropertyNameGroupMapping";
-import AuthMappingGroup from "./property/AuthMappingGroup";
+import EntityTypeMapping from "./property/EntityTypeMapping";
 import Mapping from "./property/Mapping";
 
 class AuthManager extends React.Component {
@@ -19,7 +19,7 @@ class AuthManager extends React.Component {
     propertyNameGroupList: ['BusiAddress'],
     propertyNameGroupMappingList: [
       { propertyName: "country", propertyGroupName: "BusiAddress" }, { propertyName: "province", propertyGroupName: "BusiAddress" }, { propertyName: "city", propertyGroupName: "BusiAddress" },
-     ],
+    ],
 
     entityTypeMappingList: [{ propertyGroupName: "BusiAddress", entityType: "student" }],
 
@@ -88,12 +88,17 @@ class AuthManager extends React.Component {
       this.setState({})
     }
   }
-  mappingPropertyName = (name, group) => {
-    let existInfos = this.state.propertyNameGroupMappingList.filter(x => x.propertyName == name && x.propertyGroupName == group)
-    if (existInfos.length == 0) {
-      this.state.propertyNameGroupMappingList.push({ propertyName: name, propertyGroupName: group })
-      this.setState({})
-    }
+  mappingPropertyName = (nameList, groupList) => {
+    nameList.forEach(name => {
+      groupList.forEach(group => {
+        let existInfos = this.state.propertyNameGroupMappingList.filter(x => x.propertyName == name && x.propertyGroupName == group)
+        if (existInfos.length == 0) {
+          this.state.propertyNameGroupMappingList.push({ propertyName: name, propertyGroupName: group })
+        }
+      })
+    })
+    this.studentSourceBuild()
+    this.setState({})
   }
   propertyNameGroupAdd = (name) => {
     let indexOf = this.state.propertyNameGroupList.indexOf(name)
@@ -102,12 +107,16 @@ class AuthManager extends React.Component {
       this.setState({})
     }
   }
-  mappingEntity = (entityType, propertyGroupName) => {
-    let thisList = this.state.entityTypeMapping.filter(x => x.propertyGroupName == propertyGroupName && x.entityType == entityType)
-    if (thisList.length == 0) {
-      this.state.entityTypeMapping.push({ propertyGroupName: propertyGroupName, entityType: entityType })
-      this.setState({})
-    }
+  mappingEntityType = (entityTypeList, propertyGroupNameList) => {
+    entityTypeList.forEach(entityType => {
+      propertyGroupNameList.forEach(propertyGroupName => {
+        let thisList = this.state.entityTypeMappingList.filter(x => x.propertyGroupName == propertyGroupName && x.entityType == entityType)
+        if (thisList.length == 0) {
+          this.state.entityTypeMappingList.push({ propertyGroupName: propertyGroupName, entityType: entityType })
+        }
+      })
+    })
+    this.setState({})
   }
   entityTypeAdd = (entityTypeName) => {
     let thisPros = this.state.entityTypeList.filter(x => x == entityTypeName)
@@ -191,7 +200,8 @@ class AuthManager extends React.Component {
               <PropertyNameGroupMapping
                 propertyNameList={this.state.propertyNameList}
                 propertyNameGroupList={this.state.propertyNameGroupList}
-                propertyNameMapping={this.propertyNameMapping}
+                propertyNameGroupMappingList={this.state.propertyNameGroupMappingList}
+                propertyNameMapping={this.mappingPropertyName}
               />
             </Col>
             <Col span={8}>
@@ -202,6 +212,16 @@ class AuthManager extends React.Component {
               ></PropertyName>
             </Col>
           </Row>
+            <Row>
+              <Col>
+                <EntityTypeMapping
+                  entityTypeList={this.state.entityTypeList}
+                  propertyNameGroupList={this.state.propertyNameGroupList}
+                  propertyNameGroupMappingList={this.state.propertyNameGroupMappingList}
+                  mappingEntityType={this.mappingEntityType}
+                />
+              </Col>
+            </Row>
         </div>
         <div style={{ background: '#ECECEC', padding: '30px' }}>
           <Row gutter={16}>

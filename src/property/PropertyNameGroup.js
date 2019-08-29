@@ -18,7 +18,7 @@ class PropertyNameGroup extends React.Component {
       propertyNameGroupList,
       propertyNameGroupAdd
     } = this.props
-    return (<Card title={<span>PropertyNameGroup Pool</span>} bordered={false} >
+    return (<Card title={<span>属性组 Pool</span>} bordered={false} >
       {propertyNameGroupList.map((propertyNameGroup) => {
         return <Tag closable={false} visible={true} style={{ padding: '5px', margin: '5px' }}>
           {propertyNameGroup}
