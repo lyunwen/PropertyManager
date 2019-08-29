@@ -3,36 +3,21 @@ import { Card, Tag, Input, Tooltip, Icon, Select, Button } from "antd";
 
 
 class PropertyNameGroupMapping extends React.Component {
+  state={
+    propertyNameGroupSelectedItems:[],
+    propertyNameSelectedItems:[],
+  }
   render() {
     const {
       propertyNameList,
       propertyNameGroupList,
-
-      propertyNameSelectedItems,
-      updatePropertyNameSelectedItems,
-      propertyNameGroupSelectedItems,
-      updatePropertyNameGroupSelectedItems,
-      mappingUser
+      propertyNameMapping
     } = this.props
     return (<Card title={<span>Mapping</span>} bordered={false}>
       <Select
-        mode="multiple"
         placeholder="Find Group"
-        value={propertyNameSelectedItems}
-        onChange={updatePropertyNameSelectedItems}
-        style={{ width: '30%', margin: '5px' }}
-      >
-        {propertyNameList.map(item => (
-          <Select.Option key={item} value={item}>
-            {item}
-          </Select.Option>
-        ))}
-      </Select>
-      <Select
-        mode="multiple"
-        placeholder="Find User"
-        value={propertyNameGroupSelectedItems}
-        onChange={updatePropertyNameGroupSelectedItems}
+        value={this.state.propertyNameGroupSelectedItems}
+        onChange={(value)=>{this.setState({propertyNameGroupSelectedItems:value})}}
         style={{ width: '30%', margin: '5px' }}
       >
         {propertyNameGroupList.map(item => (
@@ -41,7 +26,20 @@ class PropertyNameGroupMapping extends React.Component {
           </Select.Option>
         ))}
       </Select>
-      <Button onClick={mappingUser}>Mapping</Button>
+      <Select
+        mode="multiple"
+        placeholder="Find User"
+        value={this.state.propertyNameSelectedItems}
+        onChange={(value)=>{this.setState({propertyNameSelectedItems:value})}}
+        style={{ width: '30%', margin: '5px' }}
+      >
+        {propertyNameList.map(item => (
+          <Select.Option key={item.name} value={item.name}>
+            {item.name}
+          </Select.Option>
+        ))}
+      </Select>
+      <Button onClick={propertyNameMapping}>Mapping</Button>
     </Card>)
   }
 }

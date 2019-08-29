@@ -1,6 +1,6 @@
 import React from "react";
 import { render } from "react-dom";
-import { Row, Col, message } from "antd";
+import { Row, Col, message, Table } from "antd";
 import "antd/dist/antd.css";
 import PropertyName from "./property/PropertyName";
 import PropertyNameGroup from "./property/PropertyNameGroup";
@@ -11,26 +11,74 @@ import Mapping from "./property/Mapping";
 class AuthManager extends React.Component {
   state = {
 
-    studentList: [{ Age: 18, Name: "xiaoming", Sex: "Male" }, { Age: 21, Name: "lily", Sex: "Female" }, { Age: 17, Name: "xixi", Sex: "Male" }],
-    teacherList: [{ Age: 18, Name: "xiaoming", Sex: "Male" }, { Age: 21, Name: "lily", Sex: "Female" }, { Age: 17, Name: "xixi", Sex: "Male" }],
-    entityType: ["student", "teacher"],
+    studentList: [{ ID: '1', Age: 18, Name: "xiaoming", Sex: "Male" }, { ID: '2', Age: 21, Name: "lily", Sex: "Female" }, { ID: '3', Age: 17, Name: "xixi", Sex: "Male" }],
+    teacherList: [{ ID: '1', Age: 18, Name: "xiaoming", Sex: "Male" }, { ID: '2', Age: 21, Name: "lily", Sex: "Female" }, { ID: '3', Age: 17, Name: "xixi", Sex: "Male" }],
+    entityTypeList: ["student", "teacher"],
 
     propertyNameList: [{ name: "country", regex: ".{1,100}" }, { name: "province", regex: ".{1,100}" }, { name: "city", regex: ".{1,100}" }],
-    propertyNameGroupList: ['Address'],
-    propertyNameGroupMappingList: [{ propertyName: "country", propertyGroupName: "Address" }, { propertyName: "province", propertyGroupName: "Address" }, { propertyName: "city", propertyGroupName: "Address" }],
+    propertyNameGroupList: ['BusiAddress'],
+    propertyNameGroupMappingList: [
+      { propertyName: "country", propertyGroupName: "BusiAddress" }, { propertyName: "province", propertyGroupName: "BusiAddress" }, { propertyName: "city", propertyGroupName: "BusiAddress" },
+     ],
+
+    entityTypeMappingList: [{ propertyGroupName: "BusiAddress", entityType: "student" }],
+
+    propertyValueList: [
+      { objectID: '1', entityType: 'student', propertyGroupName: "BusiAddress", propertyName: "country", value: '中国' },
+      { objectID: '1', entityType: 'student', propertyGroupName: "BusiAddress", propertyName: "province", value: '广东' },
+      { objectID: '1', entityType: 'student', propertyGroupName: "BusiAddress", propertyName: "city", value: '南山' }
+    ],
 
     authMappingGroupList: [],
     userMappingGroupList: [],
+  }
 
-    authMappingAuthSelectedItems: [],
-    authMappingGroupSelectedItems: [],
+  getUid = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
 
-    userMappingUserSelectedItems: [],
-    userMappingGroupSelectedItems: [],
-
-    mixMappingUserSelectedItems: [],
-    mixMappingAuthSelectedItems: [],
-    mixMappingGroupSelectedItems: [],
+  studentSourceBuild() {
+    if (this.state.studentList.length > 0) {
+      this.state.studentList.forEach((student, studentIndex) => {
+        let thisPropertyValueList = this.state.propertyValueList.filter(x => x.entityType == 'student' && x.objectID == student.ID)
+        thisPropertyValueList.forEach((propertyValue) => {
+          this.state.studentList[studentIndex][propertyValue.propertyGroupName + '-' + propertyValue.propertyName] = propertyValue.value
+        })
+      })
+    }
+    return this.state.studentList;
+  }
+  studentColumnsBuild() {
+    var baseColumns = [{
+      title: 'Name',
+      dataIndex: 'Name',
+      key: 'Name',
+    }, {
+      title: 'Age',
+      dataIndex: 'Age',
+      key: 'Age',
+    }, {
+      title: 'Sex',
+      dataIndex: 'Sex',
+      key: 'Sex',
+    }];
+    let groupMappingList = this.state.entityTypeMappingList.filter(x => x.entityType == "student")
+    if (groupMappingList.length > 0) {
+      for (let i = 0; i < groupMappingList.length; i++) {
+        let propertyNameList = this.state.propertyNameGroupMappingList.filter(x => x.propertyGroupName == groupMappingList[i].propertyGroupName)
+        propertyNameList.forEach(item => {
+          baseColumns.push({
+            title: item.propertyGroupName + '-' + item.propertyName,
+            dataIndex: item.propertyGroupName + '-' + item.propertyName,
+            key: item.propertyGroupName + '-' + item.propertyName,
+          })
+        })
+      }
+    }
+    return baseColumns
   }
 
   propertyNameAdd = (name, regex) => {
@@ -40,14 +88,13 @@ class AuthManager extends React.Component {
       this.setState({})
     }
   }
-  propertyNameDel = (name, regex) => {
-    let thisPros = this.state.propertyNameList.filter(x => x.name == name && x.regex == regex)
-    if (thisPros.length > 0) {
-      this.state.propertyNameList.splice(this.state.propertyNameList.indexOf(thisPros[0]), 1)
+  mappingPropertyName = (name, group) => {
+    let existInfos = this.state.propertyNameGroupMappingList.filter(x => x.propertyName == name && x.propertyGroupName == group)
+    if (existInfos.length == 0) {
+      this.state.propertyNameGroupMappingList.push({ propertyName: name, propertyGroupName: group })
+      this.setState({})
     }
-    this.setState({})
   }
-
   propertyNameGroupAdd = (name) => {
     let indexOf = this.state.propertyNameGroupList.indexOf(name)
     if (indexOf == -1) {
@@ -55,50 +102,28 @@ class AuthManager extends React.Component {
       this.setState({})
     }
   }
-  propertyNameGroupDel = (name) => {
-    let indexOf = this.state.propertyNameGroupList.indexOf(name)
-    if (indexOf > -1) {
-      this.state.propertyNameGroupList.splice(indexOf, 1)
-    }
-    this.setState({})
-  }
-
-  mappingPropertyName = (name, group) => {
-    let existInfos = this.state.propertyNameGroupMappingList.filter(x => x.propertyName == name && x.propertyGroupName == group)
-    if (existInfos.length == 0) {
-      this.state.propertyNameGroupMappingList.push({ propertyName: name, propertyGroupName: group })
-      this.setState()
-    }
-  }
-
-  groupAdd = (name) => {
-    let indexOf = this.state.groupList.indexOf(name)
-    if (indexOf == -1) {
-      this.state.groupList.push(name)
+  mappingEntity = (entityType, propertyGroupName) => {
+    let thisList = this.state.entityTypeMapping.filter(x => x.propertyGroupName == propertyGroupName && x.entityType == entityType)
+    if (thisList.length == 0) {
+      this.state.entityTypeMapping.push({ propertyGroupName: propertyGroupName, entityType: entityType })
       this.setState({})
     }
   }
-  groupDel = (name) => {
-    let indexOf = this.state.groupList.indexOf(name)
-    console.log(this.state.groupList)
-    if (indexOf > -1) {
-      this.state.groupList.splice(indexOf, 1)
+  entityTypeAdd = (entityTypeName) => {
+    let thisPros = this.state.entityTypeList.filter(x => x == entityTypeName)
+    if (thisPros.length == 0) {
+      this.state.entityTypeList.push(entityTypeName)
+      this.setState({})
     }
-    console.log(this.state.groupList)
-    var exsitInfos = [];
-    exsitInfos = this.state.authMappingGroupSelectedItems.filter(x => x == name)
-    if (exsitInfos.length > 0) {
-      this.state.authMappingGroupSelectedItems.splice(this.state.authMappingGroupSelectedItems.indexOf(exsitInfos[0]), 1)
-    }
-    exsitInfos = this.state.userMappingGroupSelectedItems.filter(x => x == name)
-    if (exsitInfos.length > 0) {
-      this.state.userMappingGroupSelectedItems.splice(this.state.userMappingGroupSelectedItems.indexOf(exsitInfos[0]), 1)
-    }
-    exsitInfos = this.state.mixMappingGroupSelectedItems.filter(x => x == name)
-    if (exsitInfos.length > 0) {
-      this.state.mixMappingGroupSelectedItems.splice(this.state.mixMappingGroupSelectedItems.indexOf(exsitInfos[0]), 1)
-    }
-    this.setState({})
+  }
+  mappingValue = (objectID, entityType, propertyGroupName, propertyName, value) => {
+    this.state.propertyValueList.push({
+      objectID,
+      entityType,
+      propertyGroupName,
+      propertyName,
+      value
+    })
   }
 
   mappingUser = () => {
@@ -122,29 +147,6 @@ class AuthManager extends React.Component {
     message.success("成功关联" + count + "条数据")
     this.updateUserMappingUserSelectedItems([])
     this.updateUserMappingGroupSelectedItems([])
-    this.setState({})
-  }
-  mappingAuth = () => {
-    if (!this.state.authMappingAuthSelectedItems.length > 0) {
-      message.error("关联权限为空"); return
-    }
-    if (!this.state.authMappingGroupSelectedItems.length > 0) {
-      message.error("关联组为空"); return
-    }
-    let count = 0
-    for (let i = 0; i < this.state.authMappingAuthSelectedItems.length; i++) {
-      for (let j = 0; j < this.state.authMappingGroupSelectedItems.length; j++) {
-        var existInfos = this.state.authMappingGroupList.filter(x => x.auth == this.state.authMappingAuthSelectedItems[i] && x.group == this.state.authMappingGroupSelectedItems[j])
-        if (existInfos.length < 1) {
-          count++
-          this.state.authMappingGroupList.push({ auth: this.state.authMappingAuthSelectedItems[i], group: this.state.authMappingGroupSelectedItems[j] })
-        }
-      }
-    }
-    console.log(this.state.authMappingGroupList)
-    message.success("成功关联" + count + "条数据")
-    this.updateAuthMappingAuthSelectedItems([])
-    this.updateAuthMappingGroupSelectedItems([])
     this.setState({})
   }
 
@@ -182,7 +184,6 @@ class AuthManager extends React.Component {
             <Col span={8}>
               <PropertyNameGroup
                 propertyNameGroupAdd={this.propertyNameGroupAdd}
-                propertyNameGroupDel={this.propertyNameGroupDel}
                 propertyNameGroupList={this.state.propertyNameGroupList}
               ></PropertyNameGroup>
             </Col>
@@ -222,27 +223,9 @@ class AuthManager extends React.Component {
           </Row>
         </div>
         <div style={{ background: '#ECECEC', padding: '30px' }}>
-
           <Row gutter={16}>
             <Col span={24}>
-              {/* <Mapping
-                authList={this.state.authList}
-                userList={this.state.userList}
-                groupList={this.state.groupList}
-
-                userMappingGroupList={this.state.userMappingGroupList}
-                authMappingGroupList={this.state.authMappingGroupList}
-
-                mixMappingUserSelectedItems={this.state.mixMappingUserSelectedItems}
-                updateMixMappingUserSelectedItems={this.updateMixMappingUserSelectedItems}
-                mixMappingAuthSelectedItems={this.state.mixMappingAuthSelectedItems}
-                updateMixMappingAuthSelectedItems={this.updateMixMappingAuthSelectedItems}
-                mixMappingGroupSelectedItems={this.state.mixMappingGroupSelectedItems}
-                updateMixMappingGroupSelectedItems={this.updateMixMappingGroupSelectedItems}
-
-                mappingAuthD={this.mappingAuthD}
-                mappingUserD={this.mappingUserD}
-              /> */}
+              <Table dataSource={this.studentSourceBuild()} columns={this.studentColumnsBuild()} style={{ background: 'white' }}></Table>
             </Col>
           </Row>
         </div>

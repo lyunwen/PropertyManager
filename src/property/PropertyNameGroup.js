@@ -14,11 +14,14 @@ class PropertyNameGroup extends React.Component {
   };
   render() {
     const { inputVisible, inputValue } = this.state
-    const { propertyNameGroupList, propertyNameGroupDel, propertyNameGroupAdd } = this.props
+    const {
+      propertyNameGroupList,
+      propertyNameGroupAdd
+    } = this.props
     return (<Card title={<span>PropertyNameGroup Pool</span>} bordered={false} >
       {propertyNameGroupList.map((propertyNameGroup) => {
-        return <Tag closable={true} visible={true} onClose={() => propertyNameGroupDel(propertyNameGroup)} style={{ padding: '5px', margin: '5px' }}>
-          {propertyNameGroup.name}
+        return <Tag closable={false} visible={true} style={{ padding: '5px', margin: '5px' }}>
+          {propertyNameGroup}
         </Tag>
       })}
       {inputVisible && (

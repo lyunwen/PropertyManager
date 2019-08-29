@@ -16,12 +16,11 @@ class PropertyName extends React.Component {
   render() {
     const {
       propertyNameAdd,
-      propertyNameDel,
       propertyNameList,
     } = this.props
     return (<Card title={<span>PropertyName Pool</span>} bordered={false} >
       {propertyNameList.map((propertyName) => {
-        return <Tag closable={true} visible={true} onClose={() => propertyNameDel(propertyName.name, propertyName.regex)} style={{ padding: '5px', margin: '5px' }}>
+        return <Tag closable={false} visible={true} style={{ padding: '5px', margin: '5px' }}>
           {propertyName.name + "-" + propertyName.regex}
         </Tag>;
       })}
