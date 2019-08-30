@@ -7,6 +7,7 @@ import PropertyNameGroup from "./property/PropertyNameGroup";
 import PropertyNameGroupMapping from "./property/PropertyNameGroupMapping";
 import EntityTypeMapping from "./property/EntityTypeMapping";
 import Mapping from "./property/Mapping";
+import EntityValueSet from "./property/EntityValueSet";
 
 class AuthManager extends React.Component {
   state = {
@@ -14,14 +15,14 @@ class AuthManager extends React.Component {
     studentList: [{ ID: '1', Age: 18, Name: "xiaoming", Sex: "Male" }, { ID: '2', Age: 21, Name: "lily", Sex: "Female" }, { ID: '3', Age: 17, Name: "xixi", Sex: "Male" }],
     teacherList: [{ ID: '1', Age: 18, Name: "xiaoming", Sex: "Male" }, { ID: '2', Age: 21, Name: "lily", Sex: "Female" }, { ID: '3', Age: 17, Name: "xixi", Sex: "Male" }],
     entityTypeList: ["student", "teacher"],
-
-    propertyNameList: [{ name: "country", regex: ".{1,100}" }, { name: "province", regex: ".{1,100}" }, { name: "city", regex: ".{1,100}" }],
     propertyNameGroupList: ['BusiAddress'],
-    propertyNameGroupMappingList: [
-      { propertyName: "country", propertyGroupName: "BusiAddress" }, { propertyName: "province", propertyGroupName: "BusiAddress" }, { propertyName: "city", propertyGroupName: "BusiAddress" },
-    ],
-
+    propertyNameList: [{ name: "country", regex: ".{1,100}" }, { name: "province", regex: ".{1,100}" }, { name: "city", regex: ".{1,100}" }],
     entityTypeMappingList: [{ propertyGroupName: "BusiAddress", entityType: "student" }],
+    propertyNameGroupMappingList: [
+      { entityType: 'student', propertyGroupName: "BusiAddress", propertyName: "country", propertyRegex: '.{1,100}', propertyValue: null },
+      { entityType: 'student', propertyGroupName: "BusiAddress", propertyName: "province", propertyRegex: '.{1,100}', propertyValue: null },
+      { entityType: 'student', propertyGroupName: "BusiAddress", propertyName: "city", propertyRegex: '.{1,100}', propertyValue: null }
+    ],
 
     propertyValueList: [
       { objectID: '1', entityType: 'student', propertyGroupName: "BusiAddress", propertyName: "country", value: '中国' },
@@ -37,7 +38,7 @@ class AuthManager extends React.Component {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
-    });
+    })
   }
 
   studentSourceBuild() {
@@ -65,20 +66,19 @@ class AuthManager extends React.Component {
       dataIndex: 'Sex',
       key: 'Sex',
     }];
-    let groupMappingList = this.state.entityTypeMappingList.filter(x => x.entityType == "student")
-    if (groupMappingList.length > 0) {
-      for (let i = 0; i < groupMappingList.length; i++) {
-        let propertyNameList = this.state.propertyNameGroupMappingList.filter(x => x.propertyGroupName == groupMappingList[i].propertyGroupName)
-        propertyNameList.forEach(item => {
-          baseColumns.push({
-            title: item.propertyGroupName + '-' + item.propertyName,
-            dataIndex: item.propertyGroupName + '-' + item.propertyName,
-            key: item.propertyGroupName + '-' + item.propertyName,
-          })
-        })
-      }
-    }
+    let propertyNameList = this.state.propertyNameGroupMappingList.filter(x => x.entityType == 'student')
+    propertyNameList.forEach(item => {
+      baseColumns.push({
+        title: item.propertyGroupName + '-' + item.propertyName,
+        dataIndex: item.propertyGroupName + '-' + item.propertyName,
+        key: item.propertyGroupName + '-' + item.propertyName,
+      })
+    })
     return baseColumns
+  }
+
+  entityTypeGroupNamePropertyNameBuild(entityType) {
+    return this.state.propertyNameGroupMappingList.filter(x => x.entityType == entityType);
   }
 
   propertyNameAdd = (name, regex) => {
@@ -91,9 +91,19 @@ class AuthManager extends React.Component {
   mappingPropertyName = (nameList, groupList) => {
     nameList.forEach(name => {
       groupList.forEach(group => {
-        let existInfos = this.state.propertyNameGroupMappingList.filter(x => x.propertyName == name && x.propertyGroupName == group)
-        if (existInfos.length == 0) {
-          this.state.propertyNameGroupMappingList.push({ propertyName: name, propertyGroupName: group })
+        let thisPropertyNameList = this.state.propertyNameList.filter(x => x.name == name)
+        let thisPropertyNameGroupList = this.state.propertyNameGroupMappingList.filter(x => x == group)
+        if (thisPropertyNameList.length > 0 && thisPropertyNameGroupList > 0) {
+          let existInfos = this.state.propertyNameGroupMappingList.filter(x => x.propertyName == name && x.propertyGroupName == group)
+          if (existInfos.length == 0) {
+            this.state.propertyNameGroupMappingList.push({
+              entityType: 'student',
+              propertyGroupName: group,
+              propertyName: name,
+              propertyRegex: thisPropertyNameList[0].regex,
+              propertyValue: null
+            })
+          }
         }
       })
     })
@@ -125,14 +135,24 @@ class AuthManager extends React.Component {
       this.setState({})
     }
   }
-  mappingValue = (objectID, entityType, propertyGroupName, propertyName, value) => {
-    this.state.propertyValueList.push({
-      objectID,
-      entityType,
-      propertyGroupName,
-      propertyName,
-      value
+  mappingValue = (objectID, Age, Name, Sex, extraPros) => {
+    this.state.studentList.push({
+      ID: objectID,
+      Age: Age,
+      Sex: Sex,
+      Name: Name
     })
+    extraPros.forEach(x => {
+      this.state.propertyValueList.push({
+        objectID: objectID,
+        entityType: x.entityType,
+        propertyGroupName: x.propertyGroupName,
+        propertyName: x.propertyName,
+        value: x.propertyValue
+      })
+    })
+    console.log(this.state.propertyValueList)
+    this.setState({})
   }
 
   mappingUser = () => {
@@ -212,16 +232,24 @@ class AuthManager extends React.Component {
               ></PropertyName>
             </Col>
           </Row>
-            <Row>
-              <Col>
-                <EntityTypeMapping
-                  entityTypeList={this.state.entityTypeList}
-                  propertyNameGroupList={this.state.propertyNameGroupList}
-                  propertyNameGroupMappingList={this.state.propertyNameGroupMappingList}
-                  mappingEntityType={this.mappingEntityType}
-                />
-              </Col>
-            </Row>
+          <Row>
+            <Col>
+              <EntityTypeMapping
+                entityTypeList={this.state.entityTypeList}
+                propertyNameGroupList={this.state.propertyNameGroupList}
+                propertyNameGroupMappingList={this.state.propertyNameGroupMappingList}
+                mappingEntityType={this.mappingEntityType}
+              />
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <EntityValueSet
+                propertyNameGroupMappingList={this.entityTypeGroupNamePropertyNameBuild("student")}
+                mappingValue={this.mappingValue}
+              />
+            </Col>
+          </Row>
         </div>
         <div style={{ background: '#ECECEC', padding: '30px' }}>
           <Row gutter={16}>
